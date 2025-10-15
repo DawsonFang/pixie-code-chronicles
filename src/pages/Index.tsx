@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Sparkles, BookOpen, PenTool } from "lucide-react";
+import { Sparkles, BookOpen, PenTool, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import ArticleCard from "@/components/ArticleCard";
 import DailyNote from "@/components/DailyNote";
 import CategoryFilter from "@/components/CategoryFilter";
@@ -73,6 +75,12 @@ const Index = () => {
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             記錄學習旅程 · 分享技術心得 · 探索程式世界
           </p>
+          <Link to="/create">
+            <Button size="lg" className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity shadow-glow">
+              <Plus className="mr-2" />
+              新增內容
+            </Button>
+          </Link>
         </div>
       </section>
 
