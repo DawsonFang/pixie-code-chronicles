@@ -50,6 +50,63 @@ All colors MUST be HSL.
   }
 }
 
+/* Wormhole animations */
+@keyframes wormhole-rotate {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes wormhole-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.2); }
+}
+
+@keyframes particle-float {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+}
+
+.wormhole-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.wormhole-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, 
+    hsl(189 94% 55% / 0.15) 0%,
+    hsl(280 80% 65% / 0.1) 25%,
+    hsl(330 85% 65% / 0.05) 50%,
+    transparent 70%
+  );
+  animation: wormhole-pulse 4s ease-in-out infinite;
+}
+
+.wormhole-bg::after {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(from 0deg at 50% 50%,
+    transparent 0deg,
+    hsl(189 94% 55% / 0.1) 90deg,
+    transparent 180deg,
+    hsl(280 80% 65% / 0.1) 270deg,
+    transparent 360deg
+  );
+  animation: wormhole-rotate 20s linear infinite;
+}
+
+@layer components {
+  .search-bar-glow {
+    box-shadow: 0 0 20px hsl(189 94% 55% / 0.2),
+                inset 0 0 10px hsl(189 94% 55% / 0.1);
+  }
+}
+
 @layer base {
   * {
     @apply border-border;

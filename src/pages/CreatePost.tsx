@@ -8,6 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
+const COMMON_TAGS = [
+  "React", "TypeScript", "JavaScript", "Python", "Node.js",
+  "前端開發", "後端開發", "全端開發", "CSS", "Tailwind",
+  "資料庫", "API", "效能優化", "測試", "部署",
+  "Git", "Docker", "AI", "機器學習", "演算法"
+];
 
 const CreatePost = () => {
   const { toast } = useToast();
@@ -16,7 +24,7 @@ const CreatePost = () => {
     title: "",
     content: "",
     category: "",
-    tags: "",
+    tags: [] as string[],
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -41,8 +49,17 @@ const CreatePost = () => {
       title: "",
       content: "",
       category: "",
-      tags: "",
+      tags: [],
     });
+  };
+
+  const toggleTag = (tag: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.includes(tag)
+        ? prev.tags.filter(t => t !== tag)
+        : [...prev.tags, tag]
+    }));
   };
 
   return (
@@ -118,19 +135,31 @@ const CreatePost = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="tags" className="text-foreground font-medium">
-                  標籤
+              <div className="space-y-3">
+                <Label className="text-foreground font-medium">
+                  標籤 (選擇常用標籤)
                 </Label>
-                <Input
-                  id="tags"
-                  placeholder="用逗號分隔標籤，例如：React, TypeScript, 前端"
-                  value={formData.tags}
-                  onChange={(e) =>
-                    setFormData({ ...formData, tags: e.target.value })
-                  }
-                  className="bg-background/50 border-primary/20 focus:border-primary"
-                />
+                <div className="flex flex-wrap gap-2">
+                  {COMMON_TAGS.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant={formData.tags.includes(tag) ? "default" : "outline"}
+                      className={`cursor-pointer transition-all hover:scale-105 ${
+                        formData.tags.includes(tag)
+                          ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground"
+                          : "border-primary/30 hover:border-primary"
+                      }`}
+                      onClick={() => toggleTag(tag)}
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+                {formData.tags.length > 0 && (
+                  <div className="text-sm text-muted-foreground">
+                    已選擇: {formData.tags.join(", ")}
+                  </div>
+                )}
               </div>
 
               <Button

@@ -9,6 +9,7 @@ import heroBg from "@/assets/hero-bg.jpg";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState<"全部" | "筆記" | "文件">("全部");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const articles = [
     {
@@ -51,19 +52,24 @@ const Index = () => {
     { id: 3, content: "閱讀了關於 Web Vitals 的文章", time: "09:15" },
   ];
 
-  const filteredArticles = articles.filter(
-    (article) => activeCategory === "全部" || article.category === activeCategory
-  );
+  const filteredArticles = articles.filter((article) => {
+    const matchesCategory = activeCategory === "全部" || article.category === activeCategory;
+    const matchesSearch = searchQuery === "" || 
+      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      article.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[60vh] flex items-center justify-center overflow-hidden wormhole-bg">
         <div 
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center opacity-40"
           style={{ backgroundImage: `url(${heroBg})` }}
         />
-        <div className="absolute inset-0 bg-gradient-accent opacity-60" />
+        <div className="absolute inset-0 bg-gradient-accent opacity-80" />
         
         <div className="relative z-10 text-center space-y-6 px-4">
           <div className="inline-flex items-center gap-2 text-primary animate-float">
@@ -75,13 +81,17 @@ const Index = () => {
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             記錄學習旅程 · 分享技術心得 · 探索程式世界
           </p>
-          <Link to="/create">
-            <Button size="lg" className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity shadow-glow">
-              <Plus className="mr-2" />
-              新增內容
-            </Button>
-          </Link>
         </div>
+
+        {/* Floating Add Button */}
+        <Link to="/create" className="fixed bottom-8 right-8 z-50">
+          <Button 
+            size="lg" 
+            className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-all shadow-glow hover:scale-110 rounded-full w-16 h-16 p-0"
+          >
+            <Plus className="w-8 h-8" />
+          </Button>
+        </Link>
       </section>
 
       <div className="container mx-auto px-4 py-12 space-y-16">
@@ -105,6 +115,17 @@ const Index = () => {
             <BookOpen className="w-6 h-6 text-primary" />
             <h2 className="text-3xl font-bold">文章列表</h2>
             <div className="h-px flex-1 bg-gradient-primary opacity-30" />
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative max-w-2xl mx-auto">
+            <input
+              type="text"
+              placeholder="🔍 搜尋文章標題、內容或標籤..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-6 py-4 bg-card/50 backdrop-blur-sm border border-primary/30 rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary search-bar-glow transition-all"
+            />
           </div>
 
           <CategoryFilter
