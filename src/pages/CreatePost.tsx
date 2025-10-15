@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const COMMON_TAGS = [
@@ -26,6 +26,8 @@ const CreatePost = () => {
     category: "",
     tags: [] as string[],
   });
+  const [customTag, setCustomTag] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,18 +41,19 @@ const CreatePost = () => {
       return;
     }
 
-    toast({
-      title: "發布成功！",
-      description: `已成功新增${formData.category}`,
-    });
+    setIsSubmitting(true);
 
-    // 清空表單
-    setFormData({
-      title: "",
-      content: "",
-      category: "",
-      tags: [],
-    });
+    // 時空穿梭動畫效果
+    setTimeout(() => {
+      toast({
+        title: "發布成功！",
+        description: `已成功新增${formData.category}`,
+      });
+
+      setTimeout(() => {
+        navigate("/");
+      }, 500);
+    }, 1500);
   };
 
   const toggleTag = (tag: string) => {
@@ -62,8 +65,40 @@ const CreatePost = () => {
     }));
   };
 
+  const addCustomTag = () => {
+    const trimmedTag = customTag.trim();
+    if (trimmedTag && !formData.tags.includes(trimmedTag)) {
+      setFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, trimmedTag]
+      }));
+      setCustomTag("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(t => t !== tagToRemove)
+    }));
+  };
+
+  const handleCustomTagKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addCustomTag();
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {isSubmitting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center wormhole-submit">
+          <div className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-pulse">
+            穿梭中...
+          </div>
+        </div>
+      )}
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Button
           variant="ghost"
@@ -137,38 +172,78 @@ const CreatePost = () => {
 
               <div className="space-y-3">
                 <Label className="text-foreground font-medium">
-                  標籤 (選擇常用標籤)
+                  標籤
                 </Label>
-                <div className="flex flex-wrap gap-2">
-                  {COMMON_TAGS.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant={formData.tags.includes(tag) ? "default" : "outline"}
-                      className={`cursor-pointer transition-all hover:scale-105 ${
-                        formData.tags.includes(tag)
-                          ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground"
-                          : "border-primary/30 hover:border-primary"
-                      }`}
-                      onClick={() => toggleTag(tag)}
+                
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="輸入自訂標籤..."
+                      value={customTag}
+                      onChange={(e) => setCustomTag(e.target.value)}
+                      onKeyDown={handleCustomTagKeyDown}
+                      className="bg-background/50 border-primary/20 focus:border-primary"
+                    />
+                    <Button
+                      type="button"
+                      onClick={addCustomTag}
+                      variant="outline"
+                      className="border-primary/30 hover:border-primary"
                     >
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-                {formData.tags.length > 0 && (
-                  <div className="text-sm text-muted-foreground">
-                    已選擇: {formData.tags.join(", ")}
+                      <Plus className="h-4 w-4" />
+                    </Button>
                   </div>
-                )}
+
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">常用標籤：</p>
+                    <div className="flex flex-wrap gap-2">
+                      {COMMON_TAGS.map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant={formData.tags.includes(tag) ? "default" : "outline"}
+                          className={`cursor-pointer transition-all hover:scale-105 ${
+                            formData.tags.includes(tag)
+                              ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground"
+                              : "border-primary/30 hover:border-primary"
+                          }`}
+                          onClick={() => toggleTag(tag)}
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {formData.tags.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">已選擇的標籤：</p>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.tags.map((tag) => (
+                          <Badge
+                            key={tag}
+                            className="bg-gradient-to-r from-primary to-secondary text-primary-foreground"
+                          >
+                            {tag}
+                            <X
+                              className="ml-1 h-3 w-3 cursor-pointer hover:text-destructive"
+                              onClick={() => removeTag(tag)}
+                            />
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
                 size="lg"
+                disabled={isSubmitting}
               >
                 <Plus className="mr-2" />
-                發布內容
+                {isSubmitting ? "發布中..." : "發布內容"}
               </Button>
             </form>
           </CardContent>
